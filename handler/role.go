@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ken0911208818/goHomeWork/lib/middleware"
 	"github.com/ken0911208818/goHomeWork/model"
 )
 
@@ -15,43 +17,45 @@ func init() {
 }
 
 func Index(c *gin.Context) {
-	c.JSON(http.StatusOK, Budai)
+	middleware.SendResponse(c, http.StatusOK, Budai)
 }
 
 func Create(c *gin.Context) {
 	role := model.Role{}
 	if err := c.ShouldBindJSON(&role); err != nil {
-		c.JSON(http.StatusNotFound, nil)
+		middleware.SendErrorResponse(c, http.StatusNotFound, nil)
 		return
 	}
 	Budai = append(Budai, role)
-	c.JSON(http.StatusOK, role)
+	middleware.SendResponse(c, http.StatusOK, role)
 }
 
 func GetOne(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		middleware.SendErrorResponse(c, http.StatusInternalServerError, err)
+		return
 	}
 
 	for _, value := range Budai {
 		if value.ID == uint(id) {
-			c.JSON(http.StatusOK, value)
+			middleware.SendResponse(c, http.StatusOK, value)
 			return
 		}
 	}
-	c.JSON(http.StatusNotFound, "找不到該角色")
+	middleware.SendErrorResponse(c, http.StatusNotFound, errors.New("找不到該角色"))
 }
 
 func Update(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		middleware.SendErrorResponse(c, http.StatusInternalServerError, err)
+		return
 	}
 
 	role := model.Role{}
 	if err := c.ShouldBindJSON(&role); err != nil {
-		c.JSON(http.StatusNotFound, nil)
+		middleware.SendErrorResponse(c, http.StatusNotFound, nil)
 		return
 	}
 
@@ -59,28 +63,28 @@ func Update(c *gin.Context) {
 		if value.ID == uint(id) {
 			Budai[k].Name = role.Name
 			Budai[k].Summary = role.Summary
-			c.JSON(http.StatusOK, Budai[k])
+			middleware.SendResponse(c, http.StatusOK, Budai[k])
 			return
 		}
 	}
-
-	c.JSON(http.StatusNotFound, "找不到該角色")
+	middleware.SendErrorResponse(c, http.StatusNotFound, errors.New("找不到該角色"))
 }
 
 func Delete(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		middleware.SendErrorResponse(c, http.StatusInternalServerError, err)
+		return
 	}
 
 	for k, value := range Budai {
 		if value.ID == uint(id) {
 			Budai = remove(Budai, k)
-			c.JSON(http.StatusNoContent, nil)
+			middleware.SendResponse(c, http.StatusNoContent, nil)
 			return
 		}
 	}
-	c.JSON(http.StatusNotFound, "找不到該資料")
+	middleware.SendErrorResponse(c, http.StatusNotFound, errors.New("找不到該資料"))
 }
 
 func remove(r []model.Role, i int) []model.Role {
