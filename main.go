@@ -6,6 +6,11 @@ import (
 )
 
 func main() {
+	r := setupRouter()
+	r.Run("")
+}
+
+func setupRouter() *gin.Engine{
 	r := gin.Default()
 	role := r.Group("/role")
 	{
@@ -15,5 +20,5 @@ func main() {
 		role.PUT("/:id", handler.Update)
 		role.DELETE("/:id", handler.Delete)
 	}
-	r.Run(":8080")
+	return r
 }
