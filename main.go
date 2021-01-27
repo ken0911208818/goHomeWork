@@ -7,7 +7,7 @@ import (
 
 func main() {
 	r := setupRouter()
-	r.Run("")
+	r.Run(":8080")
 }
 
 func setupRouter() *gin.Engine{
